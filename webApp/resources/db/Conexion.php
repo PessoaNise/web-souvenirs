@@ -12,7 +12,7 @@ class Conexion {
     private $usuario = 'root';
     //~ private $password = $_ENV['DB_PASSWORD'];; // initialization must be a constant value.
     private $password;
-    private $nombreBaseDatos = 'souvenirs';
+    private $nombreBaseDatos = 'radio';
 
     /*
     Get an instance of the Database

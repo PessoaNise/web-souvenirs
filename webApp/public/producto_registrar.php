@@ -1,77 +1,79 @@
 <?php
 
-include '../resources/db/ProductoDB.php';
-include '../resources/db/ImagenDB.php';
-include '../resources/lib/sanitizacion.php';
+session_start();
+if (isset($_SESSION['usuario'])) {
 
-$nombreProducto = $precioCompra = $precioVenta = $descripcion = $imagen = $categoriaSel = $existencia = "";
-$errores = [];
+    include '../resources/db/ProductoDB.php';
+    include '../resources/db/ImagenDB.php';
+    include '../resources/lib/sanitizacion.php';
 
-if (isset($_POST['registar'])) {
+    $nombreProducto = $precioCompra = $precioVenta = $descripcion = $imagen = $categoriaSel = $existencia = "";
+    $errores = [];
 
-    if (empty($_POST['nombreProducto'])) {
-        $errores['nombreProducto'] = "se requiere el nombre del producto";
-    } else {
-        $nombreProducto = sanitizacion($_POST["nombreProducto"]);
-    }
+    if (isset($_POST['registar'])) {
 
-    if (empty($_POST['categoria']))
-        $errores['categoria'] = "se requiere una categoria";
-    else
-        $categoriaSel = $_POST["categoria"];
+        if (empty($_POST['nombreProducto'])) {
+            $errores['nombreProducto'] = "se requiere el nombre del producto";
+        } else {
+            $nombreProducto = sanitizacion($_POST["nombreProducto"]);
+        }
 
-    if (empty($_POST['precioCompra'])) {
-        $errores['precioCompra'] = "Se requiere el precio de compra";
-    } else {
-        $precioCompra = sanitizacion($_POST['precioCompra']);
-        if (!filter_var($precioCompra, FILTER_VALIDATE_FLOAT))
-            $errores['precioCompra'] = "No es un formato de dato correcto";
-    }
-
-    if (empty($_POST['precioVenta'])) {
-        $errores['precioVenta'] = "Se requiere el precio de venta";
-    } else {
-        $precioVenta = sanitizacion($_POST['precioVenta']);
-        if (!filter_var($precioVenta, FILTER_VALIDATE_FLOAT))
-            $errores['precioVenta'] = "No es un formato de dato correcto";
-    }
-
-    if (empty($_POST['descripcion'])) {
-        $errores['descripcion'] = "Se requiere una descripción";
-    } else {
-        $descripcion = $_POST['descripcion'];
-    }
-
-    if (empty($_POST['existencia'])) {
-        $errores['existencia'] = "Indica cuantas unidades son";
-    } else {
-        $existencia = sanitizacion($_POST['existencia']);
-        if (!filter_var($existencia, FILTER_VALIDATE_INT))
-            $errores['existencia'] = "No es un formato de dato correcto";
-    }
-
-    if (count($errores) == 0) {
-        if (isset($_POST['checkActivo']))
-            $activo = 1;
+        if (empty($_POST['categoria']))
+            $errores['categoria'] = "se requiere una categoria";
         else
-            $activo = 0;
-        $_POST['checkActivo'] = $activo;
+            $categoriaSel = $_POST["categoria"];
 
-        $errorInsertarImagen = ImagenDB::insertaImagen($_FILES);
-        if (!isset($errorInsertarImagen)) {
-            $idImagen = ImagenDB::getMaxId();
-            $resultadoRegistrarProducto = ProductoDB::insertaProducto($_POST, $idImagen);
-            $nombreProducto = $precioCompra = $precioVenta = $descripcion = $categoriaSel = $existencia = "";
+        if (empty($_POST['precioCompra'])) {
+            $errores['precioCompra'] = "Se requiere el precio de compra";
+        } else {
+            $precioCompra = sanitizacion($_POST['precioCompra']);
+            if (!filter_var($precioCompra, FILTER_VALIDATE_FLOAT))
+                $errores['precioCompra'] = "No es un formato de dato correcto";
+        }
+
+        if (empty($_POST['precioVenta'])) {
+            $errores['precioVenta'] = "Se requiere el precio de venta";
+        } else {
+            $precioVenta = sanitizacion($_POST['precioVenta']);
+            if (!filter_var($precioVenta, FILTER_VALIDATE_FLOAT))
+                $errores['precioVenta'] = "No es un formato de dato correcto";
+        }
+
+        if (empty($_POST['descripcion'])) {
+            $errores['descripcion'] = "Se requiere una descripción";
+        } else {
+            $descripcion = $_POST['descripcion'];
+        }
+
+        if (empty($_POST['existencia'])) {
+            $errores['existencia'] = "Indica cuantas unidades son";
+        } else {
+            $existencia = sanitizacion($_POST['existencia']);
+            if (!filter_var($existencia, FILTER_VALIDATE_INT))
+                $errores['existencia'] = "No es un formato de dato correcto";
+        }
+
+        if (count($errores) == 0) {
+            if (isset($_POST['checkActivo']))
+                $activo = 1;
+            else
+                $activo = 0;
+            $_POST['checkActivo'] = $activo;
+
+            $errorInsertarImagen = ImagenDB::insertaImagen($_FILES);
+            if (!isset($errorInsertarImagen)) {
+                $idImagen = ImagenDB::getMaxId();
+                $resultadoRegistrarProducto = ProductoDB::insertaProducto($_POST, $idImagen);
+            }
         }
     }
-}
 
-$PageTitle = "Registrar producto";
+    $PageTitle = "Registrar producto";
 
-include '../resources/templates/head.html';
-include '../resources/templates/header.html';
+    include '../resources/templates/head.html';
+    include '../resources/templates/header.html';
 
-?>
+    ?>
     <main>
         <div class="container-sm mt-4">
             <h2>Registrar producto</h2>
@@ -92,7 +94,7 @@ include '../resources/templates/header.html';
                                 <select class="form-select" id="categoria" name="categoria">
                                     <option value="" <?php if (!isset($categoria)) print('selected') ?>>selecciona</option>
                                     <?php
-                                    include '../resources/db/CategoriaDB.php';
+                                    include_once '../resources/db/CategoriaDB.php';
                                     $categorias = CategoriaDB::getCategorias();
                                     foreach ($categorias as $categoria): ?>
                                         <option value=<?= $categoria['id'] ?> <?php if ($categoria['id'] == $categoriaSel) print('selected') ?>> <?= $categoria['categoria'] ?></option>";
@@ -117,7 +119,7 @@ include '../resources/templates/header.html';
                         <div class="column col-6">
                             <div class="my-3">
                                 <label for="descripcion" class="form-label">Descripción</label>
-                                <textarea id="descripcion" class="form-control" rows="5" name="descripcion"><?php if(isset($descripcion)) print($descripcion) ?></textarea>
+                                <textarea id="descripcion" class="form-control" rows="5" name="descripcion"><?php if (isset($descripcion)) print($descripcion) ?></textarea>
                                 <span class="text-danger"><?php if (isset($errores['descripcion'])) print($errores['descripcion']) ?></span>
                             </div>
 
@@ -155,27 +157,32 @@ include '../resources/templates/header.html';
         </div>
     </main>
 
-<?php if (isset($errorInsertarImagen)): ?>
-    <script>
-        Swal.fire({
-            title: "<?=$errorInsertarImagen ?>",
-            icon: "error",
-            timer: 1000
-        });
-    </script>
-<?php endif ?>
+    <?php if (isset($errorInsertarImagen)): ?>
+        <script>
+            Swal.fire({
+                title: "<?=$errorInsertarImagen ?>",
+                icon: "error",
+                timer: 1000
+            });
+        </script>
+    <?php endif ?>
 
-<?php if (isset($resultadoRegistrarProducto)): ?>
-    <script>
-        Swal.fire({
-            title: "Producto registrado exitosamente",
-            icon: "success",
-            timer: 1000
-        });
-    </script>
-<?php endif ?>
+    <?php if (isset($resultadoRegistrarProducto)): ?>
+        <script>
+            Swal.fire({
+                title: "Producto registrado exitosamente",
+                icon: "success",
+                timer: 1000
+            });
+        </script>
+    <?php endif ?>
 
-<?php
-include '../resources/templates/footer.html';
-include '../resources/templates/scripts.html';
-include '../resources/templates/fin.html';
+    <?php
+    include '../resources/templates/footer.html';
+    include '../resources/templates/scripts.html';
+    include '../resources/templates/fin.html';
+
+} else {
+    header("Location:login_error.php");
+    exit();
+}

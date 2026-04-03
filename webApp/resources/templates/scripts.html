@@ -1,3 +1,21 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+<script>
+    let selectorCategoria = document.getElementById("selector-categoria")
+    let palabraBuscar = document.getElementById("palabra-buscar")
+
+    function buscarLogeado() {
+        // console.log('si')
+        let id = selectorCategoria.value
+        let palabra = palabraBuscar.value
+        document.location.href = '../../public/productos_usuario_muestra.php?id='+id+'&palabra='+palabra
+    }
+
+    function buscarNoLogeado() {
+        // console.log('no')
+        let id = selectorCategoria.value
+        let palabra = palabraBuscar.value
+        document.location.href = '../../public/productos_visitante_muestra.php?id='+id+'&palabra='+palabra
+}
+</script>
